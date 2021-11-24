@@ -10,6 +10,10 @@ body, .app {
   background: white;
 }
 
+.body-container {
+  margin: 30px;
+}
+
 /* main page */
 
 .list-books-title {
@@ -33,6 +37,7 @@ body, .app {
   padding: 0 10px 20px;
 }
 
+
 @media (min-width: 600px) {
   .bookshelf {
     padding: 0 20px 40px;
@@ -41,6 +46,12 @@ body, .app {
 
 .bookshelf-title {
   border-bottom: 1px solid #dedede;
+}
+
+.bookshelf-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .bookshelf-books {
@@ -53,7 +64,7 @@ body, .app {
   bottom: 25px;
 }
 
-.open-search button {
+.open-search a {
   display: block;
   width: 50px;
   height: 50px;
@@ -76,11 +87,7 @@ body, .app {
 /* search page */
 
 .search-books-bar {
-  position: fixed;
   width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 5;
   display: flex;
   box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 0 6px rgba(0,0,0,0.23);
 }
