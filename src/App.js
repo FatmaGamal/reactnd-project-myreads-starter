@@ -2,10 +2,11 @@ import React from 'react'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
 
-import { Link, Route } from 'react-router-dom'
+import { Link, Route, Switch } from 'react-router-dom'
 import Header from './Header'
 import Shelf from './Shelf'
 import Search from './Search'
+import NoMatch from './NoMatch'
 
 class BooksApp extends React.Component {
   state = {
@@ -14,13 +15,9 @@ class BooksApp extends React.Component {
     searchResults: []
   }
 
-  componentDidMount() {
-    const getBooks = async () => {
-        const books = await BooksAPI.getAll();
-        this.setState({books})
-    }
-
-    getBooks()
+  async componentDidMount() {
+    const books = await BooksAPI.getAll();
+    this.setState({ books })
   }
 
   updateQuery = async (q) => {
@@ -38,6 +35,8 @@ class BooksApp extends React.Component {
           })
         })
         this.setState({ searchResults });
+      } else {
+        this.setState({searchResults: []});
       }
     }
   }
@@ -47,19 +46,27 @@ class BooksApp extends React.Component {
     if (this.state.books.find((book) => (book.id === bookToUpdate.id))) {
       // just updating state
       await BooksAPI.update(bookToUpdate, value);
-      this.setState({
-        books: this.state.books.map((book) => {
-          if (book.id === bookToUpdate.id) {
-            book.shelf = value;
-          }
-          return book;
-        })
-      });
+      if (value == 'none') {
+        this.setState({
+          books: this.state.books.filter((book) => book.id !== bookToUpdate.id)
+        });
+      } else {
+        this.setState({
+          books: this.state.books.map((book) => {
+            if (book.id === bookToUpdate.id) {
+              book.shelf = value;
+            }
+            return book;
+          })
+        });
+      }
     } else {
       // new book
       await BooksAPI.update(bookToUpdate, value);
-      //TODO: not working
-      this.setState({books: [...this.state.books, {bookToUpdate, value}]});
+      this.setState(prevState => ({
+        ...prevState,
+        books: [...prevState.books, { ...bookToUpdate, shelf: value }]
+      }));
     }
   }
 
@@ -67,27 +74,32 @@ class BooksApp extends React.Component {
     const {books, searchQuery, searchResults} = this.state;
     return (
       <div className="app">
-        <Route path='/' exact render={() => (
-          <div>
-          <Header />
-          <div className="body-container">
-            <Shelf books={books} mode="show" query={searchQuery} updateBookState={this.updateBookState}/>
-            <div className="open-search">
-              <Link to='/search' >Add a book</Link>
-            </div>
-          </div>
-          </div>
-        )}
-        />
-        <Route path='/search' render={() => (
-          <div>
-            <Search query={searchQuery} updateQuery={this.updateQuery}/>
+        <Switch>
+          <Route path='/' exact render={() => (
+            <div>
+            <Header />
             <div className="body-container">
-              <Shelf books={books} mode="search" updateBookState={this.updateBookState} searchResults={searchResults} />
+              <Shelf books={books} mode="show" query={searchQuery} updateBookState={this.updateBookState}/>
+              <div className="open-search">
+                <Link to='/search' >Add a book</Link>
               </div>
-          </div>
-        )}
-        />
+            </div>
+            </div>
+          )} />
+          <Route path='/search' render={() => (
+            <div>
+              <Search query={searchQuery} updateQuery={this.updateQuery}/>
+              <div className="body-container">
+                <Shelf books={books} mode="search" updateBookState={this.updateBookState} searchResults={searchResults} />
+                </div>
+            </div>
+          )} />
+          <Route path='*' render={() => (
+            <Header>
+              <NoMatch />
+              </Header>
+          )} />
+        </Switch>
       </div>
     )
   }

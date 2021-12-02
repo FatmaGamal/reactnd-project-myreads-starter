@@ -32,13 +32,13 @@ class Shelf extends Component {
                   <option value="move" disabled>Move to...</option>
                   <option value="none">None</option>
                   {Object.keys(this.bookStates).map((state) => {
-                      return (<option value={state}>{this.bookStates[state]}</option>)
+                      return (<option value={state} key={state}>{this.bookStates[state]}</option>)
                   })}
                 </select>
               </div>
             </div>
             <div className="book-title">{book.title}</div>
-            <div className="book-authors">{book.authors}</div>
+            {book.authors ? <div className="book-authors">{book.authors.join(', ')}</div>: null}
           </div>)
         })
 
@@ -56,7 +56,7 @@ class Shelf extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.mode === 'show' && this.props.books.length && prevProps.books !== this.props.books ) {
+        if (this.props.mode === 'show' && this.props.books.length && (prevProps.books !== this.props.books || this.props.mode !== prevProps.mode)) {
             let currentShelf = this.state.bookShelf || {};
             for (var key in this.bookStates) {
                 currentShelf[key] = this.filterBooks(key)
